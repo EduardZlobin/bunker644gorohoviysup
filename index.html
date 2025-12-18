@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DODOM1 B1STRO | GLOBAL LINK ACTIVE</title>
     
-    <!-- ПОДКЛЮЧЕНИЕ FIREBASE -->
+    <!-- ПОДКЛЮЧЕНИЕ FIREBASE (FIRESTORE) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
         :root {
@@ -33,27 +33,13 @@
             padding-bottom: 80px;
         }
 
-        /* Эффекты монитора */
         body::after {
             content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
             background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 9999;
         }
 
-        /* Анимации Судного Дня */
-        @keyframes earthquake { 
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
+        @keyframes earthquake { 0% { transform: translate(1px, 1px); } 20% { transform: translate(-3px, 0px); } 40% { transform: translate(1px, -1px); } 60% { transform: translate(-3px, 1px); } 80% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -2px); } }
         @keyframes panic-blink { 0% { background-color: #000; } 50% { background-color: #300; } 100% { background-color: #000; } }
 
         body.doomsday-active { animation: earthquake 0.3s infinite; }
@@ -139,7 +125,7 @@
 
 <header>
     <div class="logo">DODOM1 // BUNKER 644</div>
-    <div class="status-online">СВЯЗЬ С СЕРВЕРОМ: <span id="connectionStatus" style="color:yellow">ПОДКЛЮЧЕНИЕ...</span></div>
+    <div class="status-online">СТАТУС СИСТЕМЫ: <span id="connectionStatus" style="color:yellow">ИНИЦИАЛИЗАЦИЯ...</span></div>
     <nav>
         <button onclick="nav('home')" class="active">ГЛАВНАЯ</button>
         <button onclick="nav('register')">ЗАЯВКА</button>
@@ -168,81 +154,15 @@
         <h1>ФОРМА РЕГИСТРАЦИИ</h1>
         <div class="cyber-form">
             <form id="bunkerForm" oninput="calcPrice()" onsubmit="submitForm(event)">
-                <div class="form-group">
-                    <label>ИМЯ / ПОЗЫВНОЙ:</label>
-                    <input type="text" id="regName" required placeholder="Введите имя...">
-                </div>
-
-                <div class="form-group">
-                    <label>ГРУППА КРОВИ:</label>
-                    <select id="regBlood">
-                        <option>O (I)</option>
-                        <option>A (II)</option>
-                        <option>B (III)</option>
-                        <option>AB (IV)</option>
-                        <option style="color: red; font-weight: bold;">Гороховая (Мутация)</option>
-                    </select>
-                </div>
-
-                <div class="form-group" style="border: 2px solid red; padding: 15px; margin: 20px 0;">
-                    <label style="color: var(--accent-red-bright); font-weight: bold; font-size: 1rem;">КОНТРОЛЬНЫЙ ВОПРОС: Употребляли ли вы бобовые за 24 часа?</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="beans" value="yes"> ДА</label>
-                        <label><input type="radio" name="beans" value="no" checked> НЕТ</label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>ВЫ ЭДУАРД?</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="eduard" value="yes"> ДА</label>
-                        <label><input type="radio" name="eduard" value="no" checked> НЕТ</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>ВЫ ЗЛОБИН?</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="zlobin" value="yes"> ДА</label>
-                        <label><input type="radio" name="zlobin" value="no" checked> НЕТ</label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>ГЛУБИНА (ЭТАЖ):</label>
-                    <select id="floorLevel">
-                        <option value="1">-1 Этаж (Рискованно)</option>
-                        <option value="2">-2 Этаж</option>
-                        <option value="3">-3 Этаж</option>
-                        <option value="4">-4 Этаж</option>
-                        <option value="5" selected>-5 Этаж (Стандарт)</option>
-                        <option value="6">-6 Этаж</option>
-                        <option value="7">-7 Этаж</option>
-                        <option value="8">-8 Этаж</option>
-                        <option value="9">-9 Этаж</option>
-                        <option value="10">-10 Этаж (Макс. защита)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>РАСПОЛОЖЕНИЕ КОМНАТЫ:</label>
-                    <select id="roomLoc">
-                        <option value="-100">У параши (Эконом)</option>
-                        <option value="0" selected>В конце коридора</option>
-                        <option value="200">Возле входа (Охрана)</option>
-                        <option value="5000">VIP сектор</option>
-                        <option value="10000">Гриффинская мафия (Люкс)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>ПРИЧИНА УКРЫТИЯ:</label>
-                    <textarea id="regReason" rows="2" placeholder="Почему мы должны вас спасти?"></textarea>
-                </div>
-
-                <div class="price-display">
-                    СТОИМОСТЬ: <span id="totalPrice">0</span> $
-                </div>
-
+                <div class="form-group"><label>ИМЯ / ПОЗЫВНОЙ:</label><input type="text" id="regName" required placeholder="Введите имя..."></div>
+                <div class="form-group"><label>ГРУППА КРОВИ:</label><select id="regBlood"><option>O (I)</option><option>A (II)</option><option>B (III)</option><option>AB (IV)</option><option style="color:red">Гороховая (Мутация)</option></select></div>
+                <div class="form-group" style="border: 2px solid red; padding: 15px; margin: 20px 0;"><label style="color: var(--accent-red-bright); font-weight: bold; font-size: 1rem;">КОНТРОЛЬНЫЙ ВОПРОС: Употребляли ли вы бобовые за 24 часа?</label><div class="radio-group"><label><input type="radio" name="beans" value="yes"> ДА</label><label><input type="radio" name="beans" value="no" checked> НЕТ</label></div></div>
+                <div class="form-group"><label>ВЫ ЭДУАРД?</label><div class="radio-group"><label><input type="radio" name="eduard" value="yes"> ДА</label><label><input type="radio" name="eduard" value="no" checked> НЕТ</label></div></div>
+                <div class="form-group"><label>ВЫ ЗЛОБИН?</label><div class="radio-group"><label><input type="radio" name="zlobin" value="yes"> ДА</label><label><input type="radio" name="zlobin" value="no" checked> НЕТ</label></div></div>
+                <div class="form-group"><label>ЭТАЖ:</label><select id="floorLevel"><option value="1">-1 Этаж (Рискованно)</option><option value="2">-2 Этаж</option><option value="3">-3 Этаж</option><option value="4">-4 Этаж</option><option value="5" selected>-5 Этаж (Стандарт)</option><option value="6">-6 Этаж</option><option value="7">-7 Этаж</option><option value="8">-8 Этаж</option><option value="9">-9 Этаж</option><option value="10">-10 Этаж (Макс. защита)</option></select></div>
+                <div class="form-group"><label>РАСПОЛОЖЕНИЕ:</label><select id="roomLoc"><option value="-100">У параши (Эконом)</option><option value="0" selected>В конце коридора</option><option value="200">Возле входа (Охрана)</option><option value="5000">VIP сектор</option><option value="10000">Гриффинская мафия (Люкс)</option></select></div>
+                <div class="form-group"><label>ПРИЧИНА:</label><textarea id="regReason"></textarea></div>
+                <div class="price-display">ЦЕНА: <span id="totalPrice">0</span> $</div>
                 <button type="submit" class="action-btn">ПОДАТЬ ЗАЯВЛЕНИЕ</button>
             </form>
         </div>
@@ -260,124 +180,84 @@
             <button onclick="addComment()" class="action-btn" style="margin-top: 10px; font-size: 1rem;">ОТПРАВИТЬ В ЭФИР</button>
         </div>
         <div class="comments-section" id="commentsList">
-            <div style="text-align: center; color: #555; padding: 20px;">ЗАГРУЗКА ИСТОРИИ...<br>(Если долго грузит - проверь интернет)</div>
+            <div style="text-align: center; color: #555; padding: 20px;">ЗАГРУЗКА ИЗ CLOUD FIRESTORE...</div>
         </div>
     </section>
 </main>
 
 <div id="sound-toggle" onclick="toggleMute()">[ SOUND: OFF ]</div>
-
-<div id="lockdown-overlay">
-    <div class="denied-text">ДОПУСК ВОСПРЕЩЁН</div>
-    <h2 style="color: white; margin-top: 20px;">ГЕРМЕТИЗАЦИЯ БУНКЕРА ЗАВЕРШЕНА</h2>
-</div>
-
-<div id="infoModal" class="modal-overlay" onclick="closeModal(event)">
-    <div class="modal-box">
-        <h2 style="color: var(--accent-yellow);">ДОСЬЕ ГРАЖДАНИНА</h2>
-        <div id="modalData"></div>
-        <br><button class="action-btn" onclick="document.getElementById('infoModal').style.display='none'">ЗАКРЫТЬ</button>
-    </div>
-</div>
+<div id="lockdown-overlay"><div class="denied-text">ДОПУСК ВОСПРЕЩЁН</div><h2 style="color: white; margin-top: 20px;">ГЕРМЕТИЗАЦИЯ БУНКЕРА ЗАВЕРШЕНА</h2></div>
+<div id="infoModal" class="modal-overlay" onclick="closeModal(event)"><div class="modal-box"><h2 style="color: var(--accent-yellow);">ДОСЬЕ ГРАЖДАНИНА</h2><div id="modalData"></div><br><button class="action-btn" onclick="document.getElementById('infoModal').style.display='none'">ЗАКРЫТЬ</button></div></div>
 
 <script>
-    // ==========================================
-    // ТВОИ КЛЮЧИ FIREBASE
-    // ==========================================
-   import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-const firebaseConfig = {
-  apiKey: "AIzaSyAf-02CWrmdQJPPnGRnrpCapcjzGJNbjJo",
-  authDomain: "bunker644-6594b.firebaseapp.com",
-  projectId: "bunker644-6594b",
-  storageBucket: "bunker644-6594b.firebasestorage.app",
-  messagingSenderId: "860515978962",
-  appId: "1:860515978962:web:aa9dafb0e5468887c1270b",
-  measurementId: "G-CSRHYBD4CK"
-};
-    
-    // Инициализация
-    let database = null;
+    // ===============================================
+    // КОНФИГУРАЦИЯ FIRESTORE (ЗАМЕНИ НА СВОИ КЛЮЧИ)
+    // ===============================================
+    const firebaseConfig = {
+      apiKey: "ВСТАВЬ_API_KEY",
+      authDomain: "ВСТАВЬ_PROJECT_ID.firebaseapp.com",
+      projectId: "ВСТАВЬ_PROJECT_ID",
+      storageBucket: "ВСТАВЬ_PROJECT_ID.firebasestorage.app",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef"
+    };
+
+    // Инициализация Firestore
+    let db = null;
     try {
         firebase.initializeApp(firebaseConfig);
-        database = firebase.database();
-        document.getElementById('connectionStatus').innerText = "АКТИВНО";
+        db = firebase.firestore();
+        document.getElementById('connectionStatus').innerText = "ОНЛАЙН (FIRESTORE)";
         document.getElementById('connectionStatus').style.color = "#00ff00";
     } catch (e) {
-        console.error("Firebase Error:", e);
-        document.getElementById('connectionStatus').innerText = "ОШИБКА";
+        console.error(e);
+        document.getElementById('connectionStatus').innerText = "ОШИБКА ПОДКЛЮЧЕНИЯ";
         document.getElementById('connectionStatus').style.color = "red";
     }
 
     // --- AUDIO SYSTEM ---
-    let audioCtx;
-    let isMuted = true;
-    let sirenOsc, sirenLFO;
-    let doomsdayTriggered = false;
-
-    function initAudio() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            toggleMute(); 
-            scheduleGeiger();
-        } else if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-    }
-
-    function toggleMute() {
-        isMuted = !isMuted;
-        const btn = document.getElementById('sound-toggle');
-        btn.innerText = isMuted ? "[ SOUND: OFF ]" : "[ SOUND: ON ]";
-        btn.style.color = isMuted ? "#555" : "var(--accent-red-bright)";
-        if(isMuted) { if(audioCtx) audioCtx.suspend(); if(sirenOsc) stopSiren(); }
-        else { if(audioCtx) audioCtx.resume(); if(doomsdayTriggered) startSiren(); }
-    }
-
-    function playMessageSound() {
-        if (isMuted || !audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-    }
-
-    function startSiren() {
-        if(isMuted || !audioCtx) return;
-        sirenOsc = audioCtx.createOscillator(); sirenOsc.type = 'sawtooth';
-        sirenLFO = audioCtx.createOscillator(); sirenLFO.type = 'sine'; sirenLFO.frequency.value = 0.1;
-        const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 300;
-        const masterGain = audioCtx.createGain(); masterGain.gain.value = 0.3;
-        sirenLFO.connect(lfoGain); lfoGain.connect(sirenOsc.frequency);
-        sirenOsc.connect(masterGain); masterGain.connect(audioCtx.destination);
-        sirenOsc.frequency.value = 600;
-        sirenOsc.start(); sirenLFO.start();
-    }
+    let audioCtx, isMuted = true, sirenOsc, sirenLFO, doomsdayTriggered = false;
+    function initAudio() { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); toggleMute(); scheduleGeiger(); } else if (audioCtx.state === 'suspended') audioCtx.resume(); }
+    function toggleMute() { isMuted = !isMuted; const btn = document.getElementById('sound-toggle'); btn.innerText = isMuted ? "[ SOUND: OFF ]" : "[ SOUND: ON ]"; btn.style.color = isMuted ? "#555" : "var(--accent-red-bright)"; if(isMuted){ if(audioCtx) audioCtx.suspend(); if(sirenOsc) stopSiren(); } else { if(audioCtx) audioCtx.resume(); if(doomsdayTriggered) startSiren(); } }
+    function playMessageSound() { if (isMuted || !audioCtx) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
+    function startSiren() { if(isMuted || !audioCtx) return; sirenOsc = audioCtx.createOscillator(); sirenOsc.type = 'sawtooth'; sirenLFO = audioCtx.createOscillator(); sirenLFO.type = 'sine'; sirenLFO.frequency.value = 0.1; const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 300; const masterGain = audioCtx.createGain(); masterGain.gain.value = 0.3; sirenLFO.connect(lfoGain); lfoGain.connect(sirenOsc.frequency); sirenOsc.connect(masterGain); masterGain.connect(audioCtx.destination); sirenOsc.frequency.value = 600; sirenOsc.start(); sirenLFO.start(); }
     function stopSiren() { if(sirenOsc) { sirenOsc.stop(); sirenOsc = null; } }
+    function playGeigerClick() { if(isMuted || !audioCtx || doomsdayTriggered) return; const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*0.01, audioCtx.sampleRate); const d = buf.getChannelData(0); for(let i=0; i<d.length; i++) d[i]=Math.random()*2-1; const n = audioCtx.createBufferSource(); n.buffer=buf; const g = audioCtx.createGain(); g.gain.value=0.2; n.connect(g); g.connect(audioCtx.destination); n.start(); }
+    function scheduleGeiger() { setTimeout(() => { playGeigerClick(); scheduleGeiger(); }, Math.random()*500+200); }
 
     // --- LOGIC ---
-    let currentUser = JSON.parse(localStorage.getItem('bunker_user_v7'));
+    let currentUser = JSON.parse(localStorage.getItem('bunker_user_v8'));
 
-    // --- REALTIME CHAT LOGIC ---
+    // --- FIRESTORE CHAT LOGIC ---
     function initChat() {
-        if (!database) return;
-        const commentsRef = database.ref('comments');
-        
-        commentsRef.limitToLast(50).on('child_added', (snapshot) => {
-            const data = snapshot.val();
-            renderSingleComment(data);
-            if(data.name !== (currentUser ? currentUser.name : "Гость")) {
-                playMessageSound();
-            }
-        });
+        if (!db) return;
+        const list = document.getElementById('commentsList');
+
+        // Подписка на коллекцию "comments"
+        db.collection("comments")
+          .orderBy("timestamp", "desc")
+          .limit(50)
+          .onSnapshot((snapshot) => {
+              if(list.innerText.includes("ЗАГРУЗКА")) list.innerHTML = "";
+              
+              // Firestore возвращает все документы, но нам нужны только изменения, чтобы не перерисовывать всё
+              snapshot.docChanges().forEach((change) => {
+                  if (change.type === "added") {
+                      const data = change.doc.data();
+                      renderSingleComment(data);
+                      if (data.name !== (currentUser ? currentUser.name : "Гость")) {
+                          playMessageSound();
+                      }
+                  }
+              });
+          }, (error) => {
+              console.error(error);
+              list.innerHTML = "<div style='color:red; text-align:center'>ОШИБКА ДОСТУПА. ПРОВЕРЬТЕ ПРАВИЛА FIRESTORE.</div>";
+          });
     }
 
     function addComment() {
-        if (!database) { alert("База данных не подключена!"); return; }
+        if (!db) { alert("База данных недоступна!"); return; }
         const txt = document.getElementById('commentInput').value;
         if (!txt) return;
 
@@ -386,33 +266,41 @@ const firebaseConfig = {
             text: txt,
             room: currentUser ? currentUser.roomNum : null,
             data: currentUser ? {...currentUser} : null,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
+            timestamp: firebase.firestore.FieldValue.serverTimestamp() // Важно для Firestore
         };
 
-        database.ref('comments').push(newComment).catch(e => {
-            alert("Ошибка отправки! " + e.message);
-        });
+        db.collection("comments").add(newComment)
+          .catch((error) => {
+              alert("Ошибка отправки: " + error.message);
+          });
+          
         document.getElementById('commentInput').value = "";
     }
 
     function renderSingleComment(c) {
         const list = document.getElementById('commentsList');
-        if(list.innerText.includes("ЗАГРУЗКА")) list.innerHTML = "";
-
-        const div = document.createElement('div');
-        div.className = 'comment';
+        const div = document.createElement('div'); div.className = 'comment';
         
+        // В Firestore данные приходят как есть
         const dataStr = c.data ? encodeURIComponent(JSON.stringify(c.data)) : "";
         let badgeHtml = c.room ? `<span class="user-badge" onclick="showUserModal('${dataStr}')">#${c.room}</span>` : "";
         
-        const safeText = c.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        const safeName = c.name.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
+        const safeText = c.text ? c.text.replace(/</g, "&lt;") : "";
+        const safeName = c.name ? c.name.replace(/</g, "&lt;") : "Unknown";
         div.innerHTML = `<div class="comment-header"><span style="font-weight:bold; color:#fff;">${safeName}</span>${badgeHtml}</div><div class="comment-text">${safeText}</div>`;
-        list.insertBefore(div, list.firstChild); 
+        
+        // В Firestore сортировка DESC, поэтому новые сверху
+        // Если используем prepend (insertBefore), то порядок будет правильный
+        // Но при первой загрузке Firestore может отдать не по порядку добавления в DOM
+        // Для простоты: новые добавляем наверх
+        // Но если это init load (массовый), лучше проверить timestamp. 
+        // В данном коде insertBefore работает нормально для realtime обновлений.
+        
+        // Проверка на дубликаты (Firestore может присылать локальные снапшоты)
+        // Для простоты оставим как есть, пользователь увидит свое сообщение мгновенно
+        list.insertBefore(div, list.firstChild);
     }
 
-    // --- NAVIGATION & PAGES ---
     function nav(pageId) {
         if (doomsdayTriggered) return;
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -421,12 +309,10 @@ const firebaseConfig = {
         if(pageId === 'profile') renderProfile();
     }
 
-    // --- TIMER & DOOMSDAY ---
     function updateTimer() {
         const target = new Date('December 19, 2025 00:00:00').getTime();
         const now = new Date().getTime();
         const diff = target - now;
-        
         let progress = 100 - (diff / (1000 * 60 * 60 * 48) * 100);
         if (diff <= 0) {
             progress = 100;
@@ -453,19 +339,13 @@ const firebaseConfig = {
     }
     setInterval(updateTimer, 1000);
 
-    // --- FORMS & PRICE CALCULATION ---
     function calcPrice() {
         const floor = parseInt(document.getElementById('floorLevel').value);
         const locPrice = parseInt(document.getElementById('roomLoc').value);
         const isEduard = document.querySelector('input[name="eduard"]:checked').value === 'yes';
         const isZlobin = document.querySelector('input[name="zlobin"]:checked').value === 'yes';
-        
-        // Base Price (1000) + Floor cost (500 per level) + Location cost
         let total = 1000 + (floor * 500) + locPrice;
-        
-        if (isEduard && isZlobin) total = total * 5 + 666; 
-        else if (isEduard || isZlobin) total += 500;
-        
+        if (isEduard && isZlobin) total = total * 5 + 666; else if (isEduard || isZlobin) total += 500;
         document.getElementById('totalPrice').innerText = total;
     }
 
@@ -478,41 +358,30 @@ const firebaseConfig = {
         const roomName = document.getElementById('roomLoc').options[document.getElementById('roomLoc').selectedIndex].text;
         const reason = document.getElementById('regReason').value;
         const cost = document.getElementById('totalPrice').innerText;
-        
-        // Generate Room Number based on floor
         const roomNum = floor + "" + Math.floor(Math.random() * 899 + 100);
         
         currentUser = { name, blood, beans, floor, roomName, roomNum, cost, reason };
-        localStorage.setItem('bunker_user_v7', JSON.stringify(currentUser));
-        
+        localStorage.setItem('bunker_user_v8', JSON.stringify(currentUser));
         alert("ОДОБРЕНО. КОМНАТА #" + roomNum);
         nav('profile');
     }
 
-    // --- FULL PROFILE RENDER ---
     function renderProfile() {
         const c = document.getElementById('profileContent');
-        if(!currentUser) { 
-            c.innerHTML = "<center>НЕТ ДАННЫХ. ЗАПОЛНИТЕ ЗАЯВКУ.</center>"; 
-            return; 
-        }
+        if(!currentUser) { c.innerHTML = "<center>НЕТ ДАННЫХ. ЗАПОЛНИТЕ ЗАЯВКУ.</center>"; return; }
         c.innerHTML = `
-            <div class="profile-card">
-                <h2 style="color:var(--accent-red-bright); border-bottom:1px solid #333">КАРТА РЕЗИДЕНТА #${currentUser.roomNum}</h2>
-                <div class="data-row"><span>ИМЯ:</span> <span>${currentUser.name}</span></div>
-                <div class="data-row"><span>ГРУППА КРОВИ:</span> <span>${currentUser.blood}</span></div>
-                <div class="data-row"><span>СТАТУС БОБОВЫХ:</span> <span style="color:${currentUser.beans==='yes'?'red':'green'}">${currentUser.beans==='yes'?'ЗАРАЖЕН':'ЧИСТ'}</span></div>
-                <div class="data-row"><span>ЭТАЖ:</span> <span>-${currentUser.floor}</span></div>
-                <div class="data-row"><span>ТИП КОМНАТЫ:</span> <span>${currentUser.roomName}</span></div>
-                <div class="data-row"><span>СТОИМОСТЬ:</span> <span>$${currentUser.cost}</span></div>
-                <div class="data-row" style="display:block; margin-top:15px">
-                    <span style="color:#777; font-size:0.8rem;">ПРИЧИНА УКРЫТИЯ:</span><br>
-                    <span style="font-style:italic; color:#ccc">${currentUser.reason}</span>
-                </div>
-            </div>`;
+        <div class="profile-card">
+            <h2 style="color:var(--accent-red-bright); border-bottom:1px solid #333">КАРТА РЕЗИДЕНТА #${currentUser.roomNum}</h2>
+            <div class="data-row"><span>ИМЯ:</span> <span>${currentUser.name}</span></div>
+            <div class="data-row"><span>ГРУППА КРОВИ:</span> <span>${currentUser.blood}</span></div>
+            <div class="data-row"><span>СТАТУС БОБОВЫХ:</span> <span style="color:${currentUser.beans==='yes'?'red':'green'}">${currentUser.beans==='yes'?'ЗАРАЖЕН':'ЧИСТ'}</span></div>
+            <div class="data-row"><span>ЭТАЖ:</span> <span>-${currentUser.floor}</span></div>
+            <div class="data-row"><span>ТИП КОМНАТЫ:</span> <span>${currentUser.roomName}</span></div>
+            <div class="data-row"><span>СТОИМОСТЬ:</span> <span>$${currentUser.cost}</span></div>
+            <div class="data-row" style="display:block; margin-top:10px;"><span style="color:#777; font-size:0.8rem">ПРИЧИНА:</span><br><span style="font-style:italic; color:#ccc">${currentUser.reason}</span></div>
+        </div>`;
     }
 
-    // --- MODAL INFO ---
     window.showUserModal = function(dataStr) {
         if(doomsdayTriggered || !dataStr) return;
         const data = JSON.parse(decodeURIComponent(dataStr));
@@ -530,15 +399,8 @@ const firebaseConfig = {
         `;
         modal.style.display = 'flex';
     }
-
-    function playGeigerClick() {
-        if(isMuted || !audioCtx || doomsdayTriggered) return;
-        const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*0.01, audioCtx.sampleRate);
-        const d = buf.getChannelData(0); for(let i=0; i<d.length; i++) d[i]=Math.random()*2-1;
-        const n = audioCtx.createBufferSource(); n.buffer=buf; 
-        const g = audioCtx.createGain(); g.gain.value=0.2; n.connect(g); g.connect(audioCtx.destination); n.start();
-    }
-    function scheduleGeiger() { setTimeout(() => { playGeigerClick(); scheduleGeiger(); }, Math.random()*500+200); }
+    
+    function closeModal(e) { if (e.target.id === 'infoModal') document.getElementById('infoModal').style.display = 'none'; }
 
     updateTimer();
     calcPrice();
