@@ -139,7 +139,7 @@
         <p style="text-align: center; color: #888; margin-bottom: 10px;">ДАТА СЕРВЕРА: 18.12.2025</p>
         <div class="countdown-box" id="timer">--:--:--</div>
         <div class="threat-container">
-            <div class="threat-label"><span>УРОВЕНЬ НАСЫЩЕНИЯ</span><span id="threat-percent">0%</span></div>
+            <div class="threat-label"><span>УРОВЕНЬ ДУРНОСТИ</span><span id="threat-percent">0%</span></div>
             <div class="meter-track"><div class="meter-fill" id="meter-fill"></div><div class="meter-scan"></div></div>
         </div>
         <div style="border: 1px solid var(--accent-red); padding: 15px; background: rgba(138, 0, 0, 0.1); margin-top: 20px;">
@@ -175,7 +175,7 @@
     <section id="comments" class="page">
         <h1>ГЛОБАЛЬНЫЙ КАНАЛ СВЯЗИ</h1>
         <div class="cyber-form" style="position: sticky; top: 0; z-index: 500;">
-            <textarea id="commentInput" rows="2" placeholder="Сообщение всем выжившим..."></textarea>
+            <textarea id="commentInput" rows="10" placeholder="Сообщение всем выжившим..."></textarea>
             <button onclick="addComment()" class="action-btn" style="margin-top: 10px; font-size: 1rem;">ОТПРАВИТЬ В ЭФИР</button>
         </div>
         <div class="comments-section" id="commentsList">
@@ -197,13 +197,13 @@
       authDomain: "bunker644-6594b.firebaseapp.com",
       databaseURL: "https://bunker644-6594b-default-rtdb.firebaseio.com",
       projectId: "bunker644-6594b",
-      storageBucket: "bunker644-6594b.firebasestorage.app",
-      messagingSenderId: "860515978962",
-      appId: "1:860515978962:web:aa9dafb0e5468887c1270b",
-      measurementId: "G-CSRHYBD4CK"
-    };
-
-    // Инициализация
+          storageBucket: "bunker644-6594b.firebasestorage.app",
+          messagingSenderId: "860515978962",
+          appId: "1:860515978962:web:aa9dafb0e5468887c1270b",
+          measurementId: "G-CSRHYBD4CK"
+        };
+    
+        // Инициализация
     let db = null;
     try {
         firebase.initializeApp(firebaseConfig);
