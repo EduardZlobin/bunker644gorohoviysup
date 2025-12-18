@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DODOM1 B1STRO | GLOBAL LINK ACTIVE</title>
     
-    <!-- ПОДКЛЮЧЕНИЕ FIREBASE (FIRESTORE) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -191,18 +190,20 @@
 
 <script>
     // ===============================================
-    // КОНФИГУРАЦИЯ FIRESTORE (ЗАМЕНИ НА СВОИ КЛЮЧИ)
+    // КОНФИГУРАЦИЯ FIRESTORE (ИЗ СКРИНШОТА)
     // ===============================================
     const firebaseConfig = {
-      apiKey: "ВСТАВЬ_API_KEY",
-      authDomain: "ВСТАВЬ_PROJECT_ID.firebaseapp.com",
-      projectId: "ВСТАВЬ_PROJECT_ID",
-      storageBucket: "ВСТАВЬ_PROJECT_ID.firebasestorage.app",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef"
+      apiKey: "AIzaSyAf-02CWrmdQJPPnGRnrpCapcjzGJNbjJo",
+      authDomain: "bunker644-6594b.firebaseapp.com",
+      databaseURL: "https://bunker644-6594b-default-rtdb.firebaseio.com",
+      projectId: "bunker644-6594b",
+      storageBucket: "bunker644-6594b.firebasestorage.app",
+      messagingSenderId: "860515978962",
+      appId: "1:860515978962:web:aa9dafb0e5468887c1270b",
+      measurementId: "G-CSRHYBD4CK"
     };
 
-    // Инициализация Firestore
+    // Инициализация
     let db = null;
     try {
         firebase.initializeApp(firebaseConfig);
@@ -228,23 +229,28 @@
     // --- LOGIC ---
     let currentUser = JSON.parse(localStorage.getItem('bunker_user_v8'));
 
-    // --- FIRESTORE CHAT LOGIC ---
+    // --- ИСПРАВЛЕННАЯ ЛОГИКА ЧАТА ---
     function initChat() {
         if (!db) return;
         const list = document.getElementById('commentsList');
 
-        // Подписка на коллекцию "comments"
         db.collection("comments")
-          .orderBy("timestamp", "desc")
-          .limit(50)
+          .orderBy("timestamp", "asc") 
           .onSnapshot((snapshot) => {
               if(list.innerText.includes("ЗАГРУЗКА")) list.innerHTML = "";
               
-              // Firestore возвращает все документы, но нам нужны только изменения, чтобы не перерисовывать всё
+              if (snapshot.empty) {
+                  list.innerHTML = "<div id='emptyMsg' style='text-align: center; color: #555; padding: 20px;'>КАНАЛ ПУСТ. ОТПРАВЬТЕ СООБЩЕНИЕ.</div>";
+              }
+
               snapshot.docChanges().forEach((change) => {
                   if (change.type === "added") {
+                      const emptyMsg = document.getElementById('emptyMsg');
+                      if(emptyMsg) emptyMsg.remove();
+
                       const data = change.doc.data();
                       renderSingleComment(data);
+                      
                       if (data.name !== (currentUser ? currentUser.name : "Гость")) {
                           playMessageSound();
                       }
@@ -252,55 +258,59 @@
               });
           }, (error) => {
               console.error(error);
-              list.innerHTML = "<div style='color:red; text-align:center'>ОШИБКА ДОСТУПА. ПРОВЕРЬТЕ ПРАВИЛА FIRESTORE.</div>";
+              if (error.code === 'failed-precondition') {
+                  list.innerHTML = "<div style='color:orange; text-align:center'>НУЖЕН ИНДЕКС. ПРОВЕРЬТЕ КОНСОЛЬ БРАУЗЕРА (F12).</div>";
+              } else {
+                  list.innerHTML = "<div style='color:red; text-align:center'>ОШИБКА: " + error.message + "</div>";
+              }
           });
     }
 
     function addComment() {
-        if (!db) { alert("База данных недоступна!"); return; }
-        const txt = document.getElementById('commentInput').value;
+        if (!db) return;
+        const input = document.getElementById('commentInput');
+        const txt = input.value.trim();
         if (!txt) return;
 
         const newComment = {
             name: currentUser ? currentUser.name : "Гость",
             text: txt,
             room: currentUser ? currentUser.roomNum : null,
-            data: currentUser ? {...currentUser} : null,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp() // Важно для Firestore
+            floor: currentUser ? currentUser.floor : null,
+            roomName: currentUser ? currentUser.roomName : null,
+            blood: currentUser ? currentUser.blood : null,
+            beans: currentUser ? currentUser.beans : null,
+            cost: currentUser ? currentUser.cost : null,
+            reason: currentUser ? currentUser.reason : null,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
         db.collection("comments").add(newComment)
-          .catch((error) => {
-              alert("Ошибка отправки: " + error.message);
-          });
-          
-        document.getElementById('commentInput').value = "";
+          .then(() => { input.value = ""; })
+          .catch((err) => { alert("Сбой передачи: " + err.message); });
     }
 
     function renderSingleComment(c) {
         const list = document.getElementById('commentsList');
-        const div = document.createElement('div'); div.className = 'comment';
+        const div = document.createElement('div'); 
+        div.className = 'comment';
         
-        // В Firestore данные приходят как есть
-        const dataStr = c.data ? encodeURIComponent(JSON.stringify(c.data)) : "";
+        const dataForModal = {
+            name: c.name, roomNum: c.room, floor: c.floor, 
+            roomName: c.roomName, blood: c.blood, 
+            beans: c.beans, cost: c.cost, reason: c.reason
+        };
+        const dataStr = encodeURIComponent(JSON.stringify(dataForModal));
+        
         let badgeHtml = c.room ? `<span class="user-badge" onclick="showUserModal('${dataStr}')">#${c.room}</span>` : "";
-        
         const safeText = c.text ? c.text.replace(/</g, "&lt;") : "";
         const safeName = c.name ? c.name.replace(/</g, "&lt;") : "Unknown";
+        
         div.innerHTML = `<div class="comment-header"><span style="font-weight:bold; color:#fff;">${safeName}</span>${badgeHtml}</div><div class="comment-text">${safeText}</div>`;
-        
-        // В Firestore сортировка DESC, поэтому новые сверху
-        // Если используем prepend (insertBefore), то порядок будет правильный
-        // Но при первой загрузке Firestore может отдать не по порядку добавления в DOM
-        // Для простоты: новые добавляем наверх
-        // Но если это init load (массовый), лучше проверить timestamp. 
-        // В данном коде insertBefore работает нормально для realtime обновлений.
-        
-        // Проверка на дубликаты (Firestore может присылать локальные снапшоты)
-        // Для простоты оставим как есть, пользователь увидит свое сообщение мгновенно
         list.insertBefore(div, list.firstChild);
     }
 
+    // --- ОСТАЛЬНЫЕ ФУНКЦИИ ---
     function nav(pageId) {
         if (doomsdayTriggered) return;
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -325,9 +335,10 @@
             const s = Math.floor((diff % (1000 * 60)) / 1000);
             document.getElementById('timer').innerText = (h<10?"0"+h:h)+":"+(m<10?"0"+m:m)+":"+(s<10?"0"+s:s);
         }
-        document.getElementById('meter-fill').style.width = progress + '%';
-        document.getElementById('threat-percent').innerText = Math.floor(progress) + '%';
-        if(doomsdayTriggered) document.getElementById('threat-percent').innerText = "100%";
+        const meter = document.getElementById('meter-fill');
+        if(meter) meter.style.width = progress + '%';
+        const percent = document.getElementById('threat-percent');
+        if(percent) percent.innerText = Math.floor(progress) + '%';
     }
 
     function triggerDoomsday() {
@@ -395,7 +406,7 @@
             <p><strong>БОБОВЫЕ:</strong> ${data.beans==='yes'?'<span style="color:red">ОПАСЕН</span>':'<span style="color:green">ЧИСТ</span>'}</p>
             <p><strong>ЦЕНА СПАСЕНИЯ:</strong> $${data.cost}</p>
             <hr style="border:0; border-top:1px dashed #333; margin:10px 0;">
-            <p style="font-size:0.8rem; color:#888;">"${data.reason}"</p>
+            <p style="font-size:0.8rem; color:#888;">"${data.reason || 'Нет данных'}"</p>
         `;
         modal.style.display = 'flex';
     }
