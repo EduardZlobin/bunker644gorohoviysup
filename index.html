@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DODOM1 B1STRO | DARKNET PROTOCOL v4.0</title>
+    <title>DODOM1 B1STRO | GLOBAL LINK ACTIVE</title>
+    
+    <!-- ПОДКЛЮЧЕНИЕ FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         :root {
             --bg-color: #050505;
@@ -28,14 +33,42 @@
             padding-bottom: 80px;
         }
 
-        /* CRT Scanline Effect */
+        /* Эффекты монитора */
         body::after {
             content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
             background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 9999;
         }
 
-        /* Header */
+        /* Анимации Судного Дня */
+        @keyframes earthquake { 
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        @keyframes panic-blink { 0% { background-color: #000; } 50% { background-color: #300; } 100% { background-color: #000; } }
+
+        body.doomsday-active { animation: earthquake 0.3s infinite; }
+        body.doomsday-active header { animation: panic-blink 0.5s infinite; border-bottom: 5px solid red; }
+
+        #lockdown-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); z-index: 5000;
+            justify-content: center; align-items: center; flex-direction: column; text-align: center;
+        }
+        .denied-text {
+            color: red; font-size: 5rem; font-weight: bold; border: 10px solid red; padding: 20px;
+            transform: rotate(-15deg); text-shadow: 0 0 20px red; background: #000;
+        }
+
         header {
             background-color: #000; border-bottom: 2px solid var(--accent-red);
             padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
@@ -43,122 +76,70 @@
         }
 
         .logo { font-weight: bold; font-size: 1.4rem; color: var(--accent-red-bright); letter-spacing: 2px; text-transform: uppercase; }
-        
         nav ul { display: flex; list-style: none; gap: 10px; }
         nav button {
             background: transparent; border: 1px solid var(--border-color); color: var(--text-main);
             padding: 8px 15px; cursor: pointer; font-family: inherit; text-transform: uppercase; transition: 0.2s;
         }
-        nav button:hover, nav button.active {
-            border-color: var(--accent-red-bright); color: var(--accent-red-bright); box-shadow: 0 0 10px rgba(255,0,0,0.2);
-        }
+        nav button:hover, nav button.active { border-color: var(--accent-red-bright); color: var(--accent-red-bright); }
 
-        /* Main Container */
         main { max-width: 900px; margin: 30px auto; padding: 20px; }
-        
         .page { display: none; }
         .page.active { display: block; animation: flickIn 0.3s ease-out; }
-
-        @keyframes flickIn {
-            0% { opacity: 0; } 10% { opacity: 0.5; } 20% { opacity: 0; } 100% { opacity: 1; }
-        }
+        @keyframes flickIn { 0% { opacity: 0; } 100% { opacity: 1; } }
 
         h1 { color: var(--accent-red-bright); text-align: center; border-bottom: 1px dashed var(--accent-red); padding-bottom: 10px; margin-bottom: 20px; }
         h2, h3 { color: var(--text-bright); margin-top: 20px; margin-bottom: 10px; text-transform: uppercase; }
 
-        /* Timer */
         .countdown-box {
             background: #000; border: 4px double var(--accent-red);
             color: var(--accent-red-bright); font-size: 2.5rem; text-align: center;
             padding: 20px; margin-bottom: 10px; text-shadow: 0 0 15px var(--accent-red);
         }
 
-        /* THREAT METER (RESTORED) */
-        .threat-container {
-            margin: 20px 0; border: 1px solid #333; background: #000; padding: 10px;
-        }
+        .threat-container { margin: 20px 0; border: 1px solid #333; background: #000; padding: 10px; }
         .threat-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.8rem; color: var(--accent-yellow); }
         .meter-track { width: 100%; height: 30px; background: #111; border: 1px solid #444; position: relative; overflow: hidden; }
-        .meter-fill {
-            height: 100%; width: 0%;
-            background: linear-gradient(90deg, #330000, #ff0000);
-            transition: width 0.5s;
-            box-shadow: 0 0 20px #ff0000;
-        }
-        .meter-scan {
-            position: absolute; top:0; bottom:0; width: 5px; background: rgba(255,255,255,0.5);
-            animation: scan 2s infinite linear;
-        }
+        .meter-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #330000, #ff0000); transition: width 0.5s; box-shadow: 0 0 20px #ff0000; }
+        .meter-scan { position: absolute; top:0; bottom:0; width: 5px; background: rgba(255,255,255,0.5); animation: scan 2s infinite linear; }
         @keyframes scan { from { left: -10%; } to { left: 110%; } }
 
-        /* Form */
-        .cyber-form {
-            background: var(--panel-bg); border: 1px solid var(--border-color); padding: 20px;
-        }
+        .cyber-form { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--accent-yellow); }
-        
-        input, select, textarea {
-            width: 100%; background: #000; border: 1px solid #444; color: #fff;
-            padding: 10px; font-family: inherit;
-        }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent-red-bright); }
-
+        input, select, textarea { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 10px; font-family: inherit; }
         .radio-group { display: flex; gap: 20px; background: #000; padding: 10px; border: 1px solid #333; }
-
-        .price-display {
-            font-size: 1.5rem; text-align: right; color: var(--accent-red-bright);
-            margin: 20px 0; border-top: 1px solid #333; padding-top: 10px;
-        }
+        .price-display { font-size: 1.5rem; text-align: right; color: var(--accent-red-bright); margin: 20px 0; border-top: 1px solid #333; padding-top: 10px; }
 
         button.action-btn {
-            width: 100%; background: var(--accent-red); color: #fff; border: none;
-            padding: 15px; font-size: 1.2rem; font-family: inherit; font-weight: bold;
-            cursor: pointer; text-transform: uppercase; transition: 0.3s;
+            width: 100%; background: var(--accent-red); color: #fff; border: none; padding: 15px; font-size: 1.2rem; font-family: inherit; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s;
         }
         button.action-btn:hover { background: var(--accent-red-bright); box-shadow: 0 0 20px var(--accent-red); }
 
-        /* Profile & Comments */
-        .profile-card {
-            background: #111; border: 2px solid var(--accent-yellow); padding: 20px; margin-bottom: 20px;
-        }
+        .profile-card { background: #111; border: 2px solid var(--accent-yellow); padding: 20px; margin-bottom: 20px; }
         .data-row { display: flex; justify-content: space-between; border-bottom: 1px dotted #333; padding: 8px 0; }
-        .data-row span:first-child { color: #888; }
-        .data-row span:last-child { color: #fff; font-weight: bold; }
+        .data-row span:last-child { color: #fff; font-weight: bold; text-align: right; }
 
-        .comments-section { margin-top: 40px; border-top: 2px solid #333; padding-top: 20px; }
-        .comment { background: #0a0a0a; border-left: 3px solid #333; padding: 10px; margin-bottom: 15px; }
+        .comments-section { margin-top: 20px; border-top: 2px solid #333; padding-top: 20px; max-height: 500px; overflow-y: auto; }
+        .comment { background: #0a0a0a; border-left: 3px solid #333; padding: 10px; margin-bottom: 15px; animation: flickIn 0.3s; }
         .comment-header { font-size: 0.8rem; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
-        .user-badge {
-            color: var(--accent-yellow); border: 1px solid var(--accent-red);
-            padding: 0 5px; cursor: pointer; font-size: 0.75rem;
-            transition: 0.2s;
-        }
+        .user-badge { color: var(--accent-yellow); border: 1px solid var(--accent-red); padding: 0 5px; cursor: pointer; font-size: 0.75rem; }
         .user-badge:hover { background: var(--accent-red); color: #fff; }
-        .comment-text { color: #ccc; }
+        .comment-text { color: #ccc; word-wrap: break-word; }
+        
+        .status-online { color: #00ff00; text-shadow: 0 0 5px #00ff00; font-size: 0.8rem; float: right; margin-top: 5px; }
 
-        /* Modal */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;
-        }
-        .modal-box {
-            background: #000; border: 2px solid var(--accent-red); padding: 20px;
-            width: 90%; max-width: 500px;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-box { background: #000; border: 2px solid var(--accent-red); padding: 20px; width: 90%; max-width: 500px; }
 
-        /* Sound Control */
-        #sound-toggle {
-            position: fixed; bottom: 20px; right: 20px; z-index: 100;
-            background: #000; border: 1px solid #555; color: #555; padding: 5px 10px;
-            font-size: 0.8rem; cursor: pointer;
-        }
+        #sound-toggle { position: fixed; bottom: 20px; right: 20px; z-index: 100; background: #000; border: 1px solid #555; color: #555; padding: 5px 10px; font-size: 0.8rem; cursor: pointer; }
     </style>
 </head>
 <body onclick="initAudio()">
 
 <header>
     <div class="logo">DODOM1 // BUNKER 644</div>
+    <div class="status-online">СВЯЗЬ С СЕРВЕРОМ: <span id="connectionStatus" style="color:yellow">ПОДКЛЮЧЕНИЕ...</span></div>
     <nav>
         <button onclick="nav('home')" class="active">ГЛАВНАЯ</button>
         <button onclick="nav('register')">ЗАЯВКА</button>
@@ -168,41 +149,25 @@
 </header>
 
 <main>
-    <!-- HOME PAGE -->
     <section id="home" class="page active">
         <h1>ВНИМАНИЕ: УГРОЗА "GOROHOVIYSUP"</h1>
-        
         <p style="text-align: center; color: #888; margin-bottom: 10px;">ДАТА СЕРВЕРА: 18.12.2025</p>
         <div class="countdown-box" id="timer">--:--:--</div>
-
-        <!-- RESTORED THREAT METER -->
         <div class="threat-container">
-            <div class="threat-label">
-                <span>УРОВЕНЬ НАСЫЩЕНИЯ ВОЗДУХА</span>
-                <span id="threat-percent">0%</span>
-            </div>
-            <div class="meter-track">
-                <div class="meter-fill" id="meter-fill"></div>
-                <div class="meter-scan"></div>
-            </div>
-            <p style="font-size: 0.7rem; color: #555; margin-top: 5px; text-align: right;">ДАТЧИКИ: АКТИВНЫ</p>
+            <div class="threat-label"><span>УРОВЕНЬ НАСЫЩЕНИЯ</span><span id="threat-percent">0%</span></div>
+            <div class="meter-track"><div class="meter-fill" id="meter-fill"></div><div class="meter-scan"></div></div>
         </div>
-
         <div style="border: 1px solid var(--accent-red); padding: 15px; background: rgba(138, 0, 0, 0.1); margin-top: 20px;">
             <h3 style="color: var(--accent-red-bright); margin-top: 0;">СТАТУС: КРИТИЧЕСКИЙ</h3>
             <p>До выброса осталось менее 24 часов. Шлюзы будут заблокированы ровно в полночь.</p>
         </div>
-        
-        <br>
-        <button class="action-btn" onclick="nav('register')">ЗАЯВКА НА УКРЫТИЕ</button>
+        <br><button class="action-btn" onclick="nav('register')">ЗАЯВКА НА УКРЫТИЕ</button>
     </section>
 
-    <!-- REGISTER PAGE -->
     <section id="register" class="page">
         <h1>ФОРМА РЕГИСТРАЦИИ</h1>
         <div class="cyber-form">
             <form id="bunkerForm" oninput="calcPrice()" onsubmit="submitForm(event)">
-                
                 <div class="form-group">
                     <label>ИМЯ / ПОЗЫВНОЙ:</label>
                     <input type="text" id="regName" required placeholder="Введите имя...">
@@ -219,8 +184,8 @@
                     </select>
                 </div>
 
-                <div class="form-group" style="border: 1px dashed var(--accent-red); padding: 10px;">
-                    <label style="color: var(--accent-red-bright);">КОНТРОЛЬНЫЙ ВОПРОС: Употребляли ли вы бобовые за 24 часа?</label>
+                <div class="form-group" style="border: 2px solid red; padding: 15px; margin: 20px 0;">
+                    <label style="color: var(--accent-red-bright); font-weight: bold; font-size: 1rem;">КОНТРОЛЬНЫЙ ВОПРОС: Употребляли ли вы бобовые за 24 часа?</label>
                     <div class="radio-group">
                         <label><input type="radio" name="beans" value="yes"> ДА</label>
                         <label><input type="radio" name="beans" value="no" checked> НЕТ</label>
@@ -242,8 +207,6 @@
                     </div>
                 </div>
 
-                <h3>КОНФИГУРАЦИЯ УБЕЖИЩА</h3>
-                
                 <div class="form-group">
                     <label>ГЛУБИНА (ЭТАЖ):</label>
                     <select id="floorLevel">
@@ -266,8 +229,8 @@
                         <option value="-100">У параши (Эконом)</option>
                         <option value="0" selected>В конце коридора</option>
                         <option value="200">Возле входа (Охрана)</option>
-                        <option value="5000">VIP Сектор</option>
-                        <option value="10000">Гриффинская Мафия (Люкс)</option>
+                        <option value="5000">VIP сектор</option>
+                        <option value="10000">Гриффинская мафия (Люкс)</option>
                     </select>
                 </div>
 
@@ -285,56 +248,79 @@
         </div>
     </section>
 
-    <!-- PROFILE PAGE -->
     <section id="profile" class="page">
         <h1>ЛИЧНЫЙ КАБИНЕТ</h1>
-        <div id="profileContent">
-            <!-- Will be filled by JS -->
-        </div>
+        <div id="profileContent"></div>
     </section>
 
-    <!-- COMMENTS PAGE -->
     <section id="comments" class="page">
-        <h1>КАНАЛ ОБЩЕЙ СВЯЗИ</h1>
-        
-        <div class="cyber-form">
-            <textarea id="commentInput" rows="2" placeholder="Передать сообщение..."></textarea>
+        <h1>ГЛОБАЛЬНЫЙ КАНАЛ СВЯЗИ</h1>
+        <div class="cyber-form" style="position: sticky; top: 0; z-index: 500;">
+            <textarea id="commentInput" rows="2" placeholder="Сообщение всем выжившим..."></textarea>
             <button onclick="addComment()" class="action-btn" style="margin-top: 10px; font-size: 1rem;">ОТПРАВИТЬ В ЭФИР</button>
         </div>
-
         <div class="comments-section" id="commentsList">
-            <!-- Comments will appear here -->
+            <div style="text-align: center; color: #555; padding: 20px;">ЗАГРУЗКА ИСТОРИИ...<br>(Если долго грузит - проверь интернет)</div>
         </div>
     </section>
-
 </main>
 
 <div id="sound-toggle" onclick="toggleMute()">[ SOUND: OFF ]</div>
 
-<!-- INFO MODAL -->
+<div id="lockdown-overlay">
+    <div class="denied-text">ДОПУСК ВОСПРЕЩЁН</div>
+    <h2 style="color: white; margin-top: 20px;">ГЕРМЕТИЗАЦИЯ БУНКЕРА ЗАВЕРШЕНА</h2>
+</div>
+
 <div id="infoModal" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-box">
         <h2 style="color: var(--accent-yellow);">ДОСЬЕ ГРАЖДАНИНА</h2>
         <div id="modalData"></div>
-        <br>
-        <button class="action-btn" onclick="document.getElementById('infoModal').style.display='none'">ЗАКРЫТЬ</button>
+        <br><button class="action-btn" onclick="document.getElementById('infoModal').style.display='none'">ЗАКРЫТЬ</button>
     </div>
 </div>
 
 <script>
-    // --- LOCAL STORAGE KEYS ---
-    const STORAGE_KEY_USER = 'bunker_user_v4';
-    const STORAGE_KEY_COMMENTS = 'bunker_comments_v4';
+    // ==========================================
+    // ТВОИ КЛЮЧИ FIREBASE
+    // ==========================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyAf-02CWrmdQJPPnGRnrpCapcjzGJNbjJo",
+        authDomain: "bunker644-6594b.firebaseapp.com",
+        databaseURL: "https://bunker644-6594b-default-rtdb.firebaseio.com",
+        projectId: "bunker644-6594b",
+        storageBucket: "bunker644-6594b.firebasestorage.app",
+        messagingSenderId: "860515978962",
+        appId: "1:860515978962:web:aa9dafb0e5468887c1270b",
+        measurementId: "G-CSRHYBD4CK"
+    };
+    
+    // Инициализация
+    let database = null;
+    try {
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        document.getElementById('connectionStatus').innerText = "АКТИВНО";
+        document.getElementById('connectionStatus').style.color = "#00ff00";
+    } catch (e) {
+        console.error("Firebase Error:", e);
+        document.getElementById('connectionStatus').innerText = "ОШИБКА";
+        document.getElementById('connectionStatus').style.color = "red";
+    }
 
-    // --- AUDIO SYSTEM (ENHANCED) ---
+    // --- AUDIO SYSTEM ---
     let audioCtx;
     let isMuted = true;
+    let sirenOsc, sirenLFO;
+    let doomsdayTriggered = false;
 
     function initAudio() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            toggleMute(); // First click enables sound
+            toggleMute(); 
             scheduleGeiger();
+        } else if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
         }
     }
 
@@ -343,312 +329,219 @@
         const btn = document.getElementById('sound-toggle');
         btn.innerText = isMuted ? "[ SOUND: OFF ]" : "[ SOUND: ON ]";
         btn.style.color = isMuted ? "#555" : "var(--accent-red-bright)";
-        if(isMuted && audioCtx) audioCtx.suspend();
-        if(!isMuted && audioCtx) audioCtx.resume();
+        if(isMuted) { if(audioCtx) audioCtx.suspend(); if(sirenOsc) stopSiren(); }
+        else { if(audioCtx) audioCtx.resume(); if(doomsdayTriggered) startSiren(); }
     }
 
-    // Livelier button click sound (Impact)
-    function playClickSound() {
+    function playMessageSound() {
         if (isMuted || !audioCtx) return;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-        osc.type = "square";
-        
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.2);
-    }
-
-    // High tech hover sound
-    function playHoverSound() {
-        if (isMuted || !audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "sawtooth";
         osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
+        osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    function startSiren() {
+        if(isMuted || !audioCtx) return;
+        sirenOsc = audioCtx.createOscillator(); sirenOsc.type = 'sawtooth';
+        sirenLFO = audioCtx.createOscillator(); sirenLFO.type = 'sine'; sirenLFO.frequency.value = 0.1;
+        const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 300;
+        const masterGain = audioCtx.createGain(); masterGain.gain.value = 0.3;
+        sirenLFO.connect(lfoGain); lfoGain.connect(sirenOsc.frequency);
+        sirenOsc.connect(masterGain); masterGain.connect(audioCtx.destination);
+        sirenOsc.frequency.value = 600;
+        sirenOsc.start(); sirenLFO.start();
+    }
+    function stopSiren() { if(sirenOsc) { sirenOsc.stop(); sirenOsc = null; } }
+
+    // --- LOGIC ---
+    let currentUser = JSON.parse(localStorage.getItem('bunker_user_v7'));
+
+    // --- REALTIME CHAT LOGIC ---
+    function initChat() {
+        if (!database) return;
+        const commentsRef = database.ref('comments');
         
-        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.05);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.05);
+        commentsRef.limitToLast(50).on('child_added', (snapshot) => {
+            const data = snapshot.val();
+            renderSingleComment(data);
+            if(data.name !== (currentUser ? currentUser.name : "Гость")) {
+                playMessageSound();
+            }
+        });
     }
 
-    // Geiger sound (Noise Burst)
-    function playGeigerClick() {
-        if (isMuted || !audioCtx) return;
-        const bufferSize = audioCtx.sampleRate * 0.01; 
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-        }
-        const noise = audioCtx.createBufferSource();
-        noise.buffer = buffer;
-        const gain = audioCtx.createGain();
-        gain.gain.value = 0.2; 
-        noise.connect(gain);
-        gain.connect(audioCtx.destination);
-        noise.start();
+    function addComment() {
+        if (!database) { alert("База данных не подключена!"); return; }
+        const txt = document.getElementById('commentInput').value;
+        if (!txt) return;
+
+        const newComment = {
+            name: currentUser ? currentUser.name : "Гость",
+            text: txt,
+            room: currentUser ? currentUser.roomNum : null,
+            data: currentUser ? {...currentUser} : null,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        database.ref('comments').push(newComment).catch(e => {
+            alert("Ошибка отправки! " + e.message);
+        });
+        document.getElementById('commentInput').value = "";
     }
 
-    function scheduleGeiger() {
-        if(Math.random() > 0.85) playGeigerClick();
-        setTimeout(scheduleGeiger, Math.random() * 400 + 100);
+    function renderSingleComment(c) {
+        const list = document.getElementById('commentsList');
+        if(list.innerText.includes("ЗАГРУЗКА")) list.innerHTML = "";
+
+        const div = document.createElement('div');
+        div.className = 'comment';
+        
+        const dataStr = c.data ? encodeURIComponent(JSON.stringify(c.data)) : "";
+        let badgeHtml = c.room ? `<span class="user-badge" onclick="showUserModal('${dataStr}')">#${c.room}</span>` : "";
+        
+        const safeText = c.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const safeName = c.name.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        div.innerHTML = `<div class="comment-header"><span style="font-weight:bold; color:#fff;">${safeName}</span>${badgeHtml}</div><div class="comment-text">${safeText}</div>`;
+        list.insertBefore(div, list.firstChild); 
     }
 
-    // Attach sounds
-    document.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('mouseenter', playHoverSound);
-        btn.addEventListener('click', playClickSound);
-    });
-
-    // --- STATE MANAGEMENT ---
-    let currentUser = null;
-    let comments = [
-        { name: "Админ_Бункера", text: "СИСТЕМА: Замечена активность в секторе 18.", room: "000", data: { name: "ADMIN", roomNum: "000", blood: "-", beans: "no", reason: "SYSTEM", cost: "∞", floor: "0"} }
-    ];
-
-    // --- LOAD DATA ---
-    function loadData() {
-        const savedUser = localStorage.getItem(STORAGE_KEY_USER);
-        if (savedUser) {
-            currentUser = JSON.parse(savedUser);
-        }
-
-        const savedComments = localStorage.getItem(STORAGE_KEY_COMMENTS);
-        if (savedComments) {
-            comments = JSON.parse(savedComments);
-        }
-        renderComments();
-    }
-
-    // --- NAVIGATION ---
+    // --- NAVIGATION & PAGES ---
     function nav(pageId) {
+        if (doomsdayTriggered) return;
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
-        
-        const navs = ['home', 'register', 'profile', 'comments'];
-        document.querySelectorAll('nav button')[navs.indexOf(pageId)].classList.add('active');
-
         if(pageId === 'profile') renderProfile();
-        if(pageId === 'comments') renderComments();
     }
 
-    // --- TIMER & METER ---
+    // --- TIMER & DOOMSDAY ---
     function updateTimer() {
         const target = new Date('December 19, 2025 00:00:00').getTime();
-        const now = new Date().getTime(); // Uses your system time. It is Dec 18, 2025 now.
+        const now = new Date().getTime();
         const diff = target - now;
-
-        // Meter Logic:
-        // Assume panic started 48 hours ago.
-        const totalDuration = 1000 * 60 * 60 * 48; 
-        let progress = 100 - (diff / totalDuration * 100);
         
-        if (progress > 100) progress = 100;
-        if (progress < 0) progress = 5; // Minimal reading
-        
-        // If diff < 0 event started
-        if (diff < 0) progress = 100;
-
+        let progress = 100 - (diff / (1000 * 60 * 60 * 48) * 100);
+        if (diff <= 0) {
+            progress = 100;
+            const timerEl = document.getElementById('timer');
+            timerEl.innerHTML = "!!! ВРЕМЯ ВЫШЛО !!!"; timerEl.style.color = "red"; timerEl.style.animation = "panic-blink 0.2s infinite";
+            if (!doomsdayTriggered) triggerDoomsday();
+        } else {
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            document.getElementById('timer').innerText = (h<10?"0"+h:h)+":"+(m<10?"0"+m:m)+":"+(s<10?"0"+s:s);
+        }
         document.getElementById('meter-fill').style.width = progress + '%';
         document.getElementById('threat-percent').innerText = Math.floor(progress) + '%';
+        if(doomsdayTriggered) document.getElementById('threat-percent').innerText = "100%";
+    }
 
-        if (diff < 0) {
-            document.getElementById('timer').innerHTML = "!!! ВРЕМЯ ВЫШЛО !!!";
-            document.getElementById('timer').style.color = "red";
-            return;
-        }
-
-        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-        document.getElementById('timer').innerText = 
-            (h < 10 ? "0"+h : h) + ":" + (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+    function triggerDoomsday() {
+        doomsdayTriggered = true;
+        document.body.classList.add('doomsday-active');
+        document.querySelectorAll('input, select, textarea, button').forEach(el => { el.disabled = true; el.style.borderColor = "red"; });
+        startSiren();
+        setTimeout(() => document.getElementById('lockdown-overlay').style.display = 'flex', 1000);
     }
     setInterval(updateTimer, 1000);
-    updateTimer();
 
-    // --- FORM LOGIC ---
+    // --- FORMS & PRICE CALCULATION ---
     function calcPrice() {
         const floor = parseInt(document.getElementById('floorLevel').value);
         const locPrice = parseInt(document.getElementById('roomLoc').value);
         const isEduard = document.querySelector('input[name="eduard"]:checked').value === 'yes';
         const isZlobin = document.querySelector('input[name="zlobin"]:checked').value === 'yes';
-
-        let floorCost = floor * 500; 
-        let total = 1000 + floorCost + locPrice;
-
-        if (isEduard && isZlobin) {
-            total = total * 5 + 666; 
-        } else if (isEduard || isZlobin) {
-            total += 500;
-        }
-
+        
+        // Base Price (1000) + Floor cost (500 per level) + Location cost
+        let total = 1000 + (floor * 500) + locPrice;
+        
+        if (isEduard && isZlobin) total = total * 5 + 666; 
+        else if (isEduard || isZlobin) total += 500;
+        
         document.getElementById('totalPrice').innerText = total;
-        return total;
     }
 
     function submitForm(e) {
         e.preventDefault();
-        playClickSound();
-
         const name = document.getElementById('regName').value;
         const blood = document.getElementById('regBlood').value;
         const beans = document.querySelector('input[name="beans"]:checked').value;
         const floor = document.getElementById('floorLevel').value;
-        const roomLocSelect = document.getElementById('roomLoc');
-        const roomName = roomLocSelect.options[roomLocSelect.selectedIndex].text;
+        const roomName = document.getElementById('roomLoc').options[document.getElementById('roomLoc').selectedIndex].text;
         const reason = document.getElementById('regReason').value;
         const cost = document.getElementById('totalPrice').innerText;
-
-        // Generate Unique Room Number (Persisted)
-        // Format: Floor + Random
+        
+        // Generate Room Number based on floor
         const roomNum = floor + "" + Math.floor(Math.random() * 899 + 100);
-
-        currentUser = {
-            name, blood, beans, floor, roomName, roomNum, reason, cost,
-            timestamp: new Date().toLocaleString()
-        };
-
-        // Save to Storage
-        localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
-
-        alert("ЗАЯВКА ОДОБРЕНА. ВАШ НОМЕР КОМНАТЫ: #" + roomNum + "\nПрофиль сохранен.");
+        
+        currentUser = { name, blood, beans, floor, roomName, roomNum, cost, reason };
+        localStorage.setItem('bunker_user_v7', JSON.stringify(currentUser));
+        
+        alert("ОДОБРЕНО. КОМНАТА #" + roomNum);
         nav('profile');
     }
 
-    // --- PROFILE RENDER ---
+    // --- FULL PROFILE RENDER ---
     function renderProfile() {
-        const container = document.getElementById('profileContent');
-        if (!currentUser) {
-            container.innerHTML = `
-                <div style="text-align:center; padding: 20px; border: 1px dashed #444;">
-                    <h3 style="color:#555">НЕТ АКТИВНОГО ПРОФИЛЯ</h3>
-                    <p>Пройдите процедуру регистрации.</p>
-                    <button class="action-btn" onclick="nav('register')" style="margin-top:10px">К РЕГИСТРАЦИИ</button>
-                </div>`;
-            return;
+        const c = document.getElementById('profileContent');
+        if(!currentUser) { 
+            c.innerHTML = "<center>НЕТ ДАННЫХ. ЗАПОЛНИТЕ ЗАЯВКУ.</center>"; 
+            return; 
         }
-
-        container.innerHTML = `
+        c.innerHTML = `
             <div class="profile-card">
                 <h2 style="color:var(--accent-red-bright); border-bottom:1px solid #333">КАРТА РЕЗИДЕНТА #${currentUser.roomNum}</h2>
                 <div class="data-row"><span>ИМЯ:</span> <span>${currentUser.name}</span></div>
                 <div class="data-row"><span>ГРУППА КРОВИ:</span> <span>${currentUser.blood}</span></div>
                 <div class="data-row"><span>СТАТУС БОБОВЫХ:</span> <span style="color:${currentUser.beans==='yes'?'red':'green'}">${currentUser.beans==='yes'?'ЗАРАЖЕН':'ЧИСТ'}</span></div>
                 <div class="data-row"><span>ЭТАЖ:</span> <span>-${currentUser.floor}</span></div>
-                <div class="data-row"><span>ТИП:</span> <span>${currentUser.roomName}</span></div>
+                <div class="data-row"><span>ТИП КОМНАТЫ:</span> <span>${currentUser.roomName}</span></div>
                 <div class="data-row"><span>СТОИМОСТЬ:</span> <span>$${currentUser.cost}</span></div>
-                <div class="data-row" style="display:block">
-                    <span>ПРИЧИНА:</span><br>
-                    <span style="font-weight:normal; color:#ccc">"${currentUser.reason}"</span>
+                <div class="data-row" style="display:block; margin-top:15px">
+                    <span style="color:#777; font-size:0.8rem;">ПРИЧИНА УКРЫТИЯ:</span><br>
+                    <span style="font-style:italic; color:#ccc">${currentUser.reason}</span>
                 </div>
-                <button class="action-btn" onclick="clearProfile()" style="margin-top:20px; background:#333; font-size:0.8rem">УДАЛИТЬ ПРОФИЛЬ (СЖЕЧЬ ДОКУМЕНТЫ)</button>
-            </div>
-        `;
+            </div>`;
     }
 
-    function clearProfile() {
-        if(confirm("Вы уверены? Ваш номер комнаты будет аннулирован.")) {
-            localStorage.removeItem(STORAGE_KEY_USER);
-            currentUser = null;
-            renderProfile();
-        }
-    }
-
-    // --- COMMENTS SYSTEM ---
-    function addComment() {
-        const txt = document.getElementById('commentInput').value;
-        if (!txt) return;
-
-        playClickSound();
-
-        const newComment = {
-            name: currentUser ? currentUser.name : "Гость",
-            text: txt,
-            room: currentUser ? currentUser.roomNum : null,
-            data: currentUser ? {...currentUser} : null
-        };
-
-        comments.unshift(newComment); // Add to top
-        if (comments.length > 50) comments.pop(); // Limit history
-
-        // Save Comments
-        localStorage.setItem(STORAGE_KEY_COMMENTS, JSON.stringify(comments));
-
-        document.getElementById('commentInput').value = "";
-        renderComments();
-    }
-
-    function renderComments() {
-        const list = document.getElementById('commentsList');
-        list.innerHTML = "";
-
-        comments.forEach((c, index) => {
-            const div = document.createElement('div');
-            div.className = 'comment';
-            
-            let badgeHtml = "";
-            if (c.room) {
-                badgeHtml = `<span class="user-badge" onclick="showUserModal(${index})">#${c.room}</span>`;
-            }
-
-            div.innerHTML = `
-                <div class="comment-header">
-                    <span style="font-weight:bold; color:#fff;">${c.name}</span>
-                    ${badgeHtml}
-                </div>
-                <div class="comment-text">${c.text}</div>
-            `;
-            list.appendChild(div);
-        });
-    }
-
-    // --- MODAL LOGIC ---
-    window.showUserModal = function(index) {
-        const c = comments[index];
-        if (!c.data) return;
-
+    // --- MODAL INFO ---
+    window.showUserModal = function(dataStr) {
+        if(doomsdayTriggered || !dataStr) return;
+        const data = JSON.parse(decodeURIComponent(dataStr));
         const modal = document.getElementById('infoModal');
-        const content = document.getElementById('modalData');
-        
-        content.innerHTML = `
-            <p><strong>ИМЯ:</strong> ${c.data.name}</p>
-            <p><strong>КОМНАТА:</strong> #${c.data.roomNum} (Этаж -${c.data.floor})</p>
-            <p><strong>КРОВЬ:</strong> ${c.data.blood}</p>
-            <p><strong>СТАТУС БОБОВЫХ:</strong> ${c.data.beans === 'yes' ? 'ОПАСЕН' : 'БЕЗОПАСЕН'}</p>
-            <p><strong>ПРИЧИНА:</strong> ${c.data.reason}</p>
-            <p><strong>ОПЛАЧЕНО:</strong> $${c.data.cost}</p>
+        document.getElementById('modalData').innerHTML = `
+            <p><strong>ИМЯ:</strong> ${data.name}</p>
+            <p><strong>КОМНАТА:</strong> #${data.roomNum}</p>
+            <p><strong>ЭТАЖ:</strong> -${data.floor}</p>
+            <p><strong>ТИП:</strong> ${data.roomName}</p>
+            <p><strong>КРОВЬ:</strong> ${data.blood}</p>
+            <p><strong>БОБОВЫЕ:</strong> ${data.beans==='yes'?'<span style="color:red">ОПАСЕН</span>':'<span style="color:green">ЧИСТ</span>'}</p>
+            <p><strong>ЦЕНА СПАСЕНИЯ:</strong> $${data.cost}</p>
+            <hr style="border:0; border-top:1px dashed #333; margin:10px 0;">
+            <p style="font-size:0.8rem; color:#888;">"${data.reason}"</p>
         `;
-        
         modal.style.display = 'flex';
-        playClickSound();
     }
 
-    function closeModal(e) {
-        if (e.target.id === 'infoModal') {
-            document.getElementById('infoModal').style.display = 'none';
-        }
+    function playGeigerClick() {
+        if(isMuted || !audioCtx || doomsdayTriggered) return;
+        const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*0.01, audioCtx.sampleRate);
+        const d = buf.getChannelData(0); for(let i=0; i<d.length; i++) d[i]=Math.random()*2-1;
+        const n = audioCtx.createBufferSource(); n.buffer=buf; 
+        const g = audioCtx.createGain(); g.gain.value=0.2; n.connect(g); g.connect(audioCtx.destination); n.start();
     }
-    
-    // Init logic
-    loadData();
+    function scheduleGeiger() { setTimeout(() => { playGeigerClick(); scheduleGeiger(); }, Math.random()*500+200); }
+
+    updateTimer();
     calcPrice();
-
+    initChat();
 </script>
-
 </body>
 </html>
